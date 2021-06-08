@@ -8,7 +8,7 @@ locals {
 
 provider "aws" {
   profile = "default"
-  region = local.region
+  region  = local.region
 }
 
 ####################
@@ -16,12 +16,12 @@ provider "aws" {
 ####################
 
 resource "aws_lb_target_group" "sama_service_green" {
-  name = "sama-service-green-tg-${var.environment}"
-  protocol = "HTTP"
-  port = 3000
-  vpc_id = var.vpc_id
+  name                 = "sama-service-green-tg-${var.environment}"
+  protocol             = "HTTP"
+  port                 = 3000
+  vpc_id               = var.vpc_id
   deregistration_delay = 30
-  target_type = "instance"
+  target_type          = "instance"
 
   health_check {
     enabled             = true
@@ -39,12 +39,12 @@ resource "aws_lb_target_group" "sama_service_green" {
 }
 
 resource "aws_lb_target_group" "sama_service_blue" {
-  name = "sama-service-blue-tg-${var.environment}"
-  protocol = "HTTP"
-  port = 3000
-  vpc_id = var.vpc_id
+  name                 = "sama-service-blue-tg-${var.environment}"
+  protocol             = "HTTP"
+  port                 = 3000
+  vpc_id               = var.vpc_id
   deregistration_delay = 30
-  target_type = "instance"
+  target_type          = "instance"
 
   health_check {
     enabled             = true
@@ -62,24 +62,24 @@ resource "aws_lb_target_group" "sama_service_blue" {
 resource "aws_lb_listener" "sama_service" {
   load_balancer_arn = var.lb_arn
 
-  port              = "443"
-  protocol          = "HTTPS"
-  ssl_policy        = "ELBSecurityPolicy-2016-08"
-  certificate_arn   = var.certificate_arn
+  port            = "443"
+  protocol        = "HTTPS"
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.certificate_arn
 
   default_action {
     type = "forward"
     forward {
       target_group {
-        arn = aws_lb_target_group.sama_service_green.arn
+        arn    = aws_lb_target_group.sama_service_green.arn
         weight = lookup(local.traffic_dist_map[var.traffic_distribution], "green", 100)
       }
       target_group {
-        arn = aws_lb_target_group.sama_service_blue.arn
+        arn    = aws_lb_target_group.sama_service_blue.arn
         weight = lookup(local.traffic_dist_map[var.traffic_distribution], "blue", 0)
       }
       stickiness {
-        enabled = false
+        enabled  = false
         duration = 1
       }
     }
@@ -93,14 +93,14 @@ resource "aws_lb_listener" "sama_service" {
 resource "aws_autoscaling_group" "green" {
   name = "sama-service-asg-green-${var.environment}"
 
-  desired_capacity          = var.enable_green_env ? var.green_instance_count : 0
-  min_size                  = 0
-  max_size                  = 4
-  vpc_zone_identifier       = var.public_subnets
-  target_group_arns = [aws_lb_target_group.sama_service_green.arn]
+  desired_capacity    = var.enable_green_env ? var.green_instance_count : 0
+  min_size            = 0
+  max_size            = 4
+  vpc_zone_identifier = var.public_subnets
+  target_group_arns   = [aws_lb_target_group.sama_service_green.arn]
 
   health_check_grace_period = 60
-  health_check_type = "ELB"
+  health_check_type         = "ELB"
 
   launch_template {
     id      = aws_launch_template.sama_service.id
@@ -117,14 +117,14 @@ resource "aws_autoscaling_group" "green" {
 resource "aws_autoscaling_group" "blue" {
   name = "sama-service-asg-blue-${var.environment}"
 
-  desired_capacity          = var.enable_blue_env ? var.blue_instance_count : 0
-  min_size                  = 0
-  max_size                  = 4
-  vpc_zone_identifier       = var.public_subnets
-  target_group_arns = [aws_lb_target_group.sama_service_blue.arn]
+  desired_capacity    = var.enable_blue_env ? var.blue_instance_count : 0
+  min_size            = 0
+  max_size            = 4
+  vpc_zone_identifier = var.public_subnets
+  target_group_arns   = [aws_lb_target_group.sama_service_blue.arn]
 
   health_check_grace_period = 15
-  health_check_type = "ELB"
+  health_check_type         = "ELB"
 
   launch_template {
     id      = aws_launch_template.sama_service.id
@@ -139,10 +139,10 @@ resource "aws_autoscaling_group" "blue" {
 }
 
 resource "aws_launch_template" "sama_service" {
-  name = "sama-service-lt-${var.environment}"
-  image_id = var.ami_id
-  instance_type = "t2.micro"
-  key_name = var.key_name
+  name                   = "sama-service-lt-${var.environment}"
+  image_id               = var.ami_id
+  instance_type          = "t2.micro"
+  key_name               = var.key_name
   update_default_version = true
 
   instance_initiated_shutdown_behavior = "terminate"
@@ -153,7 +153,7 @@ resource "aws_launch_template" "sama_service" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups = [module.asg_sg.security_group_id]
+    security_groups             = [module.asg_sg.security_group_id]
   }
 
   block_device_mappings {
@@ -170,7 +170,7 @@ resource "aws_launch_template" "sama_service" {
 
     tags = {
       Environment = var.environment
-      Name = "sama-service-${var.environment}"
+      Name        = "sama-service-${var.environment}"
     }
   }
 
@@ -180,9 +180,9 @@ resource "aws_launch_template" "sama_service" {
 module "asg_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name = "sama-service-asg-sg-${var.environment}"
+  name        = "sama-service-asg-sg-${var.environment}"
   description = "Security group for ASGs"
-  vpc_id = var.vpc_id
+  vpc_id      = var.vpc_id
 
   ingress_with_cidr_blocks = [
     {
@@ -203,9 +203,9 @@ module "asg_sg" {
 
   egress_with_cidr_blocks = [
     {
-      from_port        = 0
-      to_port          = 0
-      protocol         = "-1"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
       cidr_blocks = "0.0.0.0/0"
     }
   ]

@@ -23,7 +23,7 @@ variable "certificate_arn" {
 }
 
 variable "key_name" {
-  type = string
+  type    = string
   default = "sama-dev"
 }
 
@@ -32,7 +32,7 @@ variable "key_name" {
 ##################
 
 variable "ami_id" {
-  type = string
+  type    = string
   default = "ami-0122f4f4a505d7d7e"
 }
 

@@ -1,6 +1,9 @@
 init:
 	terraform -chdir=sama-service init -input=false
 
+validate:
+	terraform -chdir=sama-service fmt -check
+
 dev-deploy-green:
 	terraform -chdir=sama-service apply -auto-approve \
 		-var 'enable_green_env=true' \

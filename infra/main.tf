@@ -8,7 +8,7 @@ locals {
 
 provider "aws" {
   profile = "default"
-  region = local.region
+  region  = local.region
 }
 
 ###########
@@ -24,8 +24,8 @@ module "vpc" {
   azs = ["eu-central-1a", "eu-central-1b"]
 
   # Not using private subnets in dev to not have to run a NAT Gateway
-  public_subnets = ["10.0.101.0/24", "10.0.102.0/24"]
-  private_subnets = []
+  public_subnets   = ["10.0.101.0/24", "10.0.102.0/24"]
+  private_subnets  = []
   database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
 
   enable_nat_gateway = false
@@ -34,7 +34,7 @@ module "vpc" {
   create_database_subnet_group = false
 
   public_subnet_tags = {
-    Name = "subnet-public-${var.environment}"
+    Name        = "subnet-public-${var.environment}"
     Environment = var.environment
   }
 
@@ -47,7 +47,7 @@ module "vpc" {
 ###########
 
 module "db" {
-  source  = "terraform-aws-modules/rds/aws"
+  source = "terraform-aws-modules/rds/aws"
 
   identifier = "sama-${var.environment}"
 
@@ -84,7 +84,7 @@ module "db" {
 }
 
 module "rds_sg" {
-  source  = "terraform-aws-modules/security-group/aws"
+  source = "terraform-aws-modules/security-group/aws"
 
   name        = "rds-security-group-${var.environment}"
   description = "Security group for PostgreSQL RDS"
@@ -114,22 +114,22 @@ module "alb" {
 
   load_balancer_type = "application"
 
-  vpc_id = module.vpc.vpc_id
-  subnets = module.vpc.public_subnets
+  vpc_id          = module.vpc.vpc_id
+  subnets         = module.vpc.public_subnets
   security_groups = [module.alb_sg.security_group_id]
 
-  target_groups = []
-  https_listeners = []
+  target_groups        = []
+  https_listeners      = []
   https_listener_rules = []
 
   http_tcp_listeners = [
     {
-      port = 80
-      protocol = "HTTP"
+      port        = 80
+      protocol    = "HTTP"
       action_type = "redirect"
       redirect = {
-        port = "443"
-        protocol = "HTTPS"
+        port        = "443"
+        protocol    = "HTTPS"
         status_code = "HTTP_301"
       }
     }
@@ -141,18 +141,18 @@ module "alb" {
 module "alb_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name = "alb-security-group-${var.environment}"
+  name        = "alb-security-group-${var.environment}"
   description = "Security group for ALBs"
-  vpc_id = module.vpc.vpc_id
+  vpc_id      = module.vpc.vpc_id
 
   ingress_cidr_blocks = ["0.0.0.0/0"]
-  ingress_rules = ["http-80-tcp", "https-443-tcp"]
+  ingress_rules       = ["http-80-tcp", "https-443-tcp"]
 
   egress_with_cidr_blocks = [
     {
-      from_port        = 0
-      to_port          = 0
-      protocol         = "-1"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
       cidr_blocks = "0.0.0.0/0"
     }
   ]
