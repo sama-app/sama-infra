@@ -1,8 +1,13 @@
 init:
-	terraform -chdir=sama-service init -input=false
+	@terraform -chdir=sama-service init -input=false
 
 validate:
 	terraform -chdir=sama-service fmt -check
+
+dev-current-deployment:
+	@terraform -chdir=sama-service show -json | \
+	jq -r '.values.root_module.resources[] | select (.type == "aws_lb_listener") | .values.default_action[].forward[].target_group[] | select (.weight == 100) | .arn' | \
+	grep -o -P '(?<=sama-service-).*(?=-tg-dev)'
 
 dev-deploy-green:
 	terraform -chdir=sama-service apply -auto-approve \
