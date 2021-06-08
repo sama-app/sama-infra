@@ -6,5 +6,11 @@ terraform {
     }
   }
 
+  backend "s3" {
+    bucket = "terraform-sama"
+    key    = "dev/sama-service.tfstate"
+    region = "eu-central-1"
+  }
+
   required_version = ">= 0.14.9"
 }
