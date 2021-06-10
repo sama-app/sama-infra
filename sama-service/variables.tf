@@ -28,7 +28,7 @@ variable "key_name" {
 }
 
 variable "cloudwatch-logs-bucket-name" {
-  type = string
+  type    = string
   default = "cloudwatch-logs-sama"
 }
 
