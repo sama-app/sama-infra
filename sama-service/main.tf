@@ -156,7 +156,7 @@ resource "aws_launch_template" "sama_service" {
   network_interfaces {
     associate_public_ip_address = true
     security_groups = [
-    module.asg_sg.security_group_id]
+      module.asg_sg.security_group_id]
   }
 
   block_device_mappings {
@@ -193,6 +193,13 @@ module "asg_sg" {
       to_port     = 3000
       protocol    = "TCP"
       description = "application port"
+      cidr_blocks = "10.0.0.0/16"
+    },
+    {
+      from_port   = 9100
+      to_port     = 9100
+      protocol    = "TCP"
+      description = "node exporter port"
       cidr_blocks = "10.0.0.0/16"
     },
     {

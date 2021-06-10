@@ -38,7 +38,7 @@ variable "cloudwatch-logs-bucket-name" {
 
 variable "ami_id" {
   type    = string
-  default = "ami-0db7eeb7f46d0c888"
+  default = "ami-038a2eb0f2939524e"
 }
 
 variable "enable_green_env" {
