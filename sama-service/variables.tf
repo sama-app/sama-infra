@@ -27,13 +27,18 @@ variable "key_name" {
   default = "sama-dev"
 }
 
+variable "cloudwatch-logs-bucket-name" {
+  type = string
+  default = "cloudwatch-logs-sama"
+}
+
 ##################
 ### Deployment ###
 ##################
 
 variable "ami_id" {
   type    = string
-  default = "ami-0122f4f4a505d7d7e"
+  default = "ami-0db7eeb7f46d0c888"
 }
 
 variable "enable_green_env" {

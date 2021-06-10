@@ -97,7 +97,8 @@ resource "aws_autoscaling_group" "green" {
   min_size            = 0
   max_size            = 4
   vpc_zone_identifier = var.public_subnets
-  target_group_arns   = [aws_lb_target_group.sama_service_green.arn]
+  target_group_arns = [
+  aws_lb_target_group.sama_service_green.arn]
 
   health_check_grace_period = 60
   health_check_type         = "ELB"
@@ -121,7 +122,8 @@ resource "aws_autoscaling_group" "blue" {
   min_size            = 0
   max_size            = 4
   vpc_zone_identifier = var.public_subnets
-  target_group_arns   = [aws_lb_target_group.sama_service_blue.arn]
+  target_group_arns = [
+  aws_lb_target_group.sama_service_blue.arn]
 
   health_check_grace_period = 15
   health_check_type         = "ELB"
@@ -153,7 +155,8 @@ resource "aws_launch_template" "sama_service" {
 
   network_interfaces {
     associate_public_ip_address = true
-    security_groups             = [module.asg_sg.security_group_id]
+    security_groups = [
+    module.asg_sg.security_group_id]
   }
 
   block_device_mappings {
@@ -224,7 +227,8 @@ resource "aws_iam_role" "sama_service_asg" {
   path = "/"
 
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
+    "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess",
+    aws_iam_policy.cloudwatch_logs.arn
   ]
 
   assume_role_policy = jsonencode({
@@ -242,4 +246,35 @@ resource "aws_iam_role" "sama_service_asg" {
   })
 
   tags = local.tags
+}
+
+resource "aws_iam_policy" "cloudwatch_logs" {
+  name = "CloudwatchLogWriterForEC2"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect : "Allow",
+        Action : [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogStreams"
+        ],
+        Resource : [
+          "arn:aws:logs:*:*:*"
+        ]
+      },
+      {
+        Effect : "Allow",
+        Action : [
+          "s3:GetObject"
+        ],
+        Resource : [
+          "arn:aws:s3:::${var.cloudwatch-logs-bucket-name}/*"
+        ]
+      }
+    ]
+  })
 }
