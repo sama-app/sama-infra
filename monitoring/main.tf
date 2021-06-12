@@ -11,21 +11,21 @@ provider "aws" {
   region = local.region
 }
 
-module "prometheus"  {
+module "monitoring"  {
   source                 = "terraform-aws-modules/ec2-instance/aws"
   version                = "~> 2.0"
 
-  name                   = "prometheus-${var.environment}"
+  name                   = "monitoring-${var.environment}"
 
   instance_count         = 1
   ami                    = var.ami_id
   instance_type          = "t2.micro"
 
-  vpc_security_group_ids = [module.prometheus_sg.security_group_id]
+  vpc_security_group_ids = [module.monitoring_sg.security_group_id]
   subnet_id              = var.subnet_id
   associate_public_ip_address = true
 
-  iam_instance_profile = aws_iam_instance_profile.prometheus.name
+  iam_instance_profile = aws_iam_instance_profile.monitoring.name
 
   ebs_block_device = [
     {
@@ -42,12 +42,12 @@ module "prometheus"  {
   tags = local.tags
 }
 
-module "prometheus_sg" {
+module "monitoring_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  name        = "prometheus-sg-${var.environment}"
-  description = "Security group for Prometheus"
+  name        = "monitoring-sg-${var.environment}"
+  description = "Security group for monitoring"
   vpc_id      = var.vpc_id
 
   ingress_with_cidr_blocks = [
@@ -77,13 +77,13 @@ module "prometheus_sg" {
   egress_rules        = ["all-all"]
 }
 
-resource "aws_iam_instance_profile" "prometheus" {
-  name = "prometheus-instance-profile-${var.environment}"
-  role = aws_iam_role.prometheus.name
+resource "aws_iam_instance_profile" "monitoring" {
+  name = "monitoring-instance-profile-${var.environment}"
+  role = aws_iam_role.monitoring.name
 }
 
-resource "aws_iam_role" "prometheus" {
-  name = "prometheus-role-${var.environment}"
+resource "aws_iam_role" "monitoring" {
+  name = "monitoring-role-${var.environment}"
   path = "/"
 
   managed_policy_arns = [
