@@ -27,6 +27,10 @@ variable "key_name" {
   default = "sama-dev"
 }
 
+variable "secret_manager_secret_arn" {
+  type = string
+}
+
 variable "cloudwatch-logs-bucket-name" {
   type    = string
   default = "cloudwatch-logs-sama"

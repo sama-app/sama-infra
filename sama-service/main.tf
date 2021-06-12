@@ -281,6 +281,19 @@ resource "aws_iam_policy" "cloudwatch_logs" {
         Resource : [
           "arn:aws:s3:::${var.cloudwatch-logs-bucket-name}/*"
         ]
+      },
+      {
+        Effect: "Allow",
+        Action: [
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds",
+          "secretsmanager:ListSecrets"
+        ],
+        Resource: [
+          var.secret_manager_secret_arn
+        ]
       }
     ]
   })
