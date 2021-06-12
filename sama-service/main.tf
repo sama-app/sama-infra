@@ -156,7 +156,7 @@ resource "aws_launch_template" "sama_service" {
   network_interfaces {
     associate_public_ip_address = true
     security_groups = [
-      module.asg_sg.security_group_id]
+    module.asg_sg.security_group_id]
   }
 
   block_device_mappings {
