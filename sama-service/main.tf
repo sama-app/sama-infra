@@ -101,7 +101,7 @@ resource "aws_autoscaling_group" "green" {
   aws_lb_target_group.sama_service_green.arn]
 
   health_check_grace_period = 90
-  health_check_type         = "ELB"
+  health_check_type         = "EC2"
 
   launch_template {
     id      = aws_launch_template.sama_service.id
