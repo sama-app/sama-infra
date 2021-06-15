@@ -18,7 +18,7 @@ variable "lb_arn" {
   type = string
 }
 
-variable "certificate_arn" {
+variable "lb_listener_arn" {
   type = string
 }
 

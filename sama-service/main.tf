@@ -59,16 +59,13 @@ resource "aws_lb_target_group" "sama_service_blue" {
   }
 }
 
-resource "aws_lb_listener" "sama_service" {
-  load_balancer_arn = var.lb_arn
 
-  port            = "443"
-  protocol        = "HTTPS"
-  ssl_policy      = "ELBSecurityPolicy-2016-08"
-  certificate_arn = var.certificate_arn
+resource "aws_lb_listener_rule" "sama-service" {
+  listener_arn = var.lb_listener_arn
 
-  default_action {
+  action {
     type = "forward"
+
     forward {
       target_group {
         arn    = aws_lb_target_group.sama_service_green.arn
@@ -82,6 +79,12 @@ resource "aws_lb_listener" "sama_service" {
         enabled  = false
         duration = 1
       }
+    }
+  }
+
+  condition {
+    path_pattern {
+      values = ["/api/*"]
     }
   }
 }
