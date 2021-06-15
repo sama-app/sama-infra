@@ -138,6 +138,25 @@ module "alb" {
   tags = local.tags
 }
 
+resource "aws_lb_listener" "sama_service" {
+  load_balancer_arn = module.alb.lb_arn
+
+  port            = "443"
+  protocol        = "HTTPS"
+  ssl_policy      = "ELBSecurityPolicy-2016-08"
+  certificate_arn = var.certificate_arn
+
+  default_action {
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Bad Gateway"
+      status_code  = "502"
+    }
+  }
+}
+
 module "alb_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
