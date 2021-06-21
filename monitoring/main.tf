@@ -1,11 +1,3 @@
-locals {
-  region = "eu-central-1"
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
 provider "aws" {
   profile = "default"
   region = local.region
@@ -15,14 +7,14 @@ module "monitoring"  {
   source                 = "terraform-aws-modules/ec2-instance/aws"
   version                = "~> 2.0"
 
-  name                   = "monitoring-${var.environment}"
+  name                   = "monitoring-${terraform.workspace}"
 
   instance_count         = 1
   ami                    = var.ami_id
   instance_type          = "t2.micro"
 
   vpc_security_group_ids = [module.monitoring_sg.security_group_id]
-  subnet_id              = var.subnet_id
+  subnet_id              = local.env.subnet_id
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.monitoring.name
@@ -36,7 +28,7 @@ module "monitoring"  {
     }
   ]
 
-  key_name               = var.key_name
+  key_name               = local.env.key_name
   monitoring             = false
 
   tags = local.tags
@@ -46,9 +38,9 @@ module "monitoring_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  name        = "monitoring-sg-${var.environment}"
+  name        = "monitoring-sg-${terraform.workspace}"
   description = "Security group for monitoring"
-  vpc_id      = var.vpc_id
+  vpc_id      = local.env.vpc_id
 
   ingress_with_cidr_blocks = [
     {
@@ -78,12 +70,12 @@ module "monitoring_sg" {
 }
 
 resource "aws_iam_instance_profile" "monitoring" {
-  name = "monitoring-instance-profile-${var.environment}"
+  name = "monitoring-instance-profile-${terraform.workspace}"
   role = aws_iam_role.monitoring.name
 }
 
 resource "aws_iam_role" "monitoring" {
-  name = "monitoring-role-${var.environment}"
+  name = "monitoring-role-${terraform.workspace}"
   path = "/"
 
   managed_policy_arns = [

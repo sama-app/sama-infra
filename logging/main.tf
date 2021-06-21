@@ -2,7 +2,7 @@ locals {
   region = "eu-central-1"
 
   tags = {
-    Environment = var.environment
+    Environment = terraform.workspace
   }
 }
 

@@ -1,7 +1,3 @@
-###################
-### Environment ###
-###################
+locals {
 
-variable "environment" {
-  type = string
 }

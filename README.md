@@ -1,6 +1,7 @@
 # sama-infra
 
-Terraform of Sama stack
+Terraform modules that define core Sama infrastructure
+
 
 ```
 network/ -> VPCs, Subnets, ALBs, etc

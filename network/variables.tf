@@ -1,11 +1,9 @@
-###################
-### Environment ###
-###################
+locals {
+  region = "eu-central-1"
 
-variable "environment" {
-  type = string
-}
+  env = yamldecode(file("./env/${terraform.workspace}/env.yaml"))
 
-variable "certificate_arn" {
-  type = string
+  tags = {
+    Environment = terraform.workspace
+  }
 }

@@ -1,11 +1,3 @@
-locals {
-  region = "eu-central-1"
-
-  tags = {
-    Environment = var.environment
-  }
-}
-
 provider "aws" {
   profile = "default"
   region  = local.region
@@ -18,7 +10,7 @@ provider "aws" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  name = "vpc-${var.environment}"
+  name = "vpc-${terraform.workspace}"
   cidr = "10.0.0.0/16"
 
   azs = ["eu-central-1a", "eu-central-1b"]
@@ -34,8 +26,8 @@ module "vpc" {
   create_database_subnet_group = false
 
   public_subnet_tags = {
-    Name        = "subnet-public-${var.environment}"
-    Environment = var.environment
+    Name        = "subnet-public-${terraform.workspace}"
+    Environment = terraform.workspace
   }
 
   tags = local.tags
@@ -48,7 +40,7 @@ module "vpc" {
 module "alb" {
   source = "terraform-aws-modules/alb/aws"
 
-  name = "alb-${var.environment}"
+  name = "alb-${terraform.workspace}"
 
   load_balancer_type = "application"
 
@@ -82,7 +74,7 @@ resource "aws_lb_listener" "ssl" {
   port            = "443"
   protocol        = "HTTPS"
   ssl_policy      = "ELBSecurityPolicy-2016-08"
-  certificate_arn = var.certificate_arn
+  certificate_arn = local.env.certificate_arn
 
   default_action {
     type = "fixed-response"
@@ -98,7 +90,7 @@ resource "aws_lb_listener" "ssl" {
 module "alb_sg" {
   source = "terraform-aws-modules/security-group/aws"
 
-  name        = "alb-security-group-${var.environment}"
+  name        = "alb-security-group-${terraform.workspace}"
   description = "Security group for ALBs"
   vpc_id      = module.vpc.vpc_id
 

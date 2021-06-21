@@ -1,23 +1,17 @@
+locals {
+  region = "eu-central-1"
+
+  env = yamldecode(file("./env/${terraform.workspace}/env.yaml"))
+
+  tags = {
+    Environment = terraform.workspace
+    Type        = "monitoring"
+  }
+}
+
 ###################
 ### Environment ###
 ###################
-
-variable "environment" {
-  type = string
-}
-
-variable "vpc_id" {
-  type = string
-}
-
-variable "subnet_id" {
-  type = string
-}
-
-variable "key_name" {
-  type    = string
-  default = "sama-dev"
-}
 
 variable "ami_id" {
   type    = string

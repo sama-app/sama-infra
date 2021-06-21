@@ -1,27 +1,9 @@
 locals {
   region = "eu-central-1"
 
+  env = yamldecode(file("./env/${terraform.workspace}/env.yaml"))
+
   tags = {
-    Environment = var.environment
+    Environment = terraform.workspace
   }
-}
-
-###################
-### Environment ###
-###################
-
-variable "environment" {
-  type = string
-}
-
-variable "vpc_id" {
-  type = string
-}
-
-variable "vpc_cidr_block" {
-  type = string
-}
-
-variable "subnets" {
-  type = list(string)
 }
