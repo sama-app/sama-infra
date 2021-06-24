@@ -1,5 +1,5 @@
 # Monitoring
 
-Prometheus and Grafana run on a single EC2 instance directly from a pre-built AMI.
+Prometheus and Grafana run dockerized on a single EC2 instance
 
-The configuration in prometheus/prometheus.yml has to be applied manually for changes to propagate.
+Build scripts for docker images can be found in grafana/ and prometheus/

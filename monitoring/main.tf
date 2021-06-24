@@ -1,38 +1,84 @@
 provider "aws" {
   profile = "default"
-  region = local.region
+  region  = local.region
 }
 
-module "monitoring"  {
-  source                 = "terraform-aws-modules/ec2-instance/aws"
-  version                = "~> 2.0"
+resource "aws_lb_target_group" "monitoring" {
+  name        = "monitoring-tg-${terraform.workspace}"
+  protocol    = "HTTP"
+  port        = 3000
+  vpc_id      = local.env.vpc_id
+  target_type = "instance"
 
-  name                   = "monitoring-${terraform.workspace}"
+  health_check {
+    enabled             = true
+    interval            = 15
+    path                = "/api/health"
+    port                = "traffic-port"
+    healthy_threshold   = 3
+    unhealthy_threshold = 5
+    timeout             = 5
+    protocol            = "HTTP"
+    matcher             = "200-299"
+  }
+}
 
-  instance_count         = 1
-  ami                    = var.ami_id
-  instance_type          = "t2.micro"
+resource "aws_lb_target_group_attachment" "monitoring" {
+  target_group_arn = aws_lb_target_group.monitoring.arn
+  target_id        = module.monitoring.id[0]
+  port             = 3000
+}
 
-  vpc_security_group_ids = [module.monitoring_sg.security_group_id]
-  subnet_id              = local.env.subnet_id
+resource "aws_lb_listener_rule" "monitoring" {
+  listener_arn = local.env.lb_listener_arn
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.monitoring.arn
+  }
+
+  condition {
+    host_header {
+      values = ["grafana.meetsama.com.smtest.it"]
+    }
+  }
+}
+
+# Deployment
+module "monitoring" {
+  source  = "terraform-aws-modules/ec2-instance/aws"
+  version = "~> 2.0"
+
+  name = "monitoring-${terraform.workspace}"
+
+  instance_count = 1
+  ami            = var.ami_id
+  instance_type  = "t2.micro"
+
+  vpc_security_group_ids = [
+  module.monitoring_sg.security_group_id]
+  subnet_id                   = local.env.subnet_id
   associate_public_ip_address = true
 
   iam_instance_profile = aws_iam_instance_profile.monitoring.name
 
-  ebs_block_device = [
+  root_block_device = [
     {
-      device_name = "/dev/sda1"
-      volume_type = "gp2"
-      volume_size = 8
-      encrypted   = false
+      delete_on_termination = false
+      volume_type           = "gp2"
+      volume_size           = 20
+      encrypted             = false
     }
   ]
 
-  key_name               = local.env.key_name
-  monitoring             = false
+  key_name   = local.env.key_name
+  monitoring = false
+
+  user_data = filebase64("${path.module}/scripts/deploy.sh")
 
   tags = local.tags
 }
+
 
 module "monitoring_sg" {
   source  = "terraform-aws-modules/security-group/aws"
@@ -47,14 +93,21 @@ module "monitoring_sg" {
       from_port   = 3000
       to_port     = 3000
       protocol    = "TCP"
-      description = "application port"
-      cidr_blocks = "0.0.0.0/0"
+      description = "grafana port"
+      cidr_blocks = "10.0.0.0/16"
+    },
+    {
+      from_port   = 9090
+      to_port     = 9090
+      protocol    = "TCP"
+      description = "prometheus port"
+      cidr_blocks = "10.0.0.0/16"
     },
     {
       from_port   = 9100
       to_port     = 9100
       protocol    = "TCP"
-      description = "application port"
+      description = "metrics port"
       cidr_blocks = "10.0.0.0/16"
     },
     {
@@ -66,7 +119,9 @@ module "monitoring_sg" {
     }
   ]
 
-  egress_rules        = ["all-all"]
+  egress_rules = [
+    "all-all"
+  ]
 }
 
 resource "aws_iam_instance_profile" "monitoring" {
@@ -79,7 +134,8 @@ resource "aws_iam_role" "monitoring" {
   path = "/"
 
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
+    "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess"
   ]
 
   assume_role_policy = jsonencode({

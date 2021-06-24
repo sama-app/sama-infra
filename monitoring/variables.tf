@@ -15,5 +15,5 @@ locals {
 
 variable "ami_id" {
   type    = string
-  default = "ami-0d547b7d6e7668b70"
+  default = "ami-0b93d9e35bfc492f9"
 }
