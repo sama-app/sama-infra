@@ -11,22 +11,29 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "vpc-${terraform.workspace}"
-  cidr = "10.0.0.0/16"
+  cidr = local.env.vpc.cidr
 
   azs = ["eu-central-1a", "eu-central-1b"]
 
   # Not using private subnets in dev to not have to run a NAT Gateway
-  public_subnets   = ["10.0.101.0/24", "10.0.102.0/24"]
-  private_subnets  = []
-  database_subnets = ["10.0.201.0/24", "10.0.202.0/24"]
+  public_subnets   = local.env.vpc.subnets.public
+  private_subnets  = local.env.vpc.subnets.private
+  database_subnets = local.env.vpc.subnets.db
 
-  enable_nat_gateway = false
+  enable_nat_gateway = local.env.vpc.nat_gateway_enabled
   enable_vpn_gateway = false
 
   create_database_subnet_group = false
 
   public_subnet_tags = {
-    Name        = "subnet-public-${terraform.workspace}"
+    Environment = terraform.workspace
+  }
+
+  private_subnet_tags = {
+    Environment = terraform.workspace
+  }
+
+  database_subnet_tags = {
     Environment = terraform.workspace
   }
 

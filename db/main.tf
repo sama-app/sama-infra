@@ -23,7 +23,7 @@ module "db" {
   instance_class       = "db.t3.micro"
 
   allocated_storage = 20
-  storage_encrypted = false
+  storage_encrypted = local.env.production
 
   name                   = "sama"
   username               = "postgres"
@@ -31,15 +31,16 @@ module "db" {
   random_password_length = 12
   port                   = 5432
 
-  multi_az               = false
+  multi_az               = local.env.production
   subnet_ids             = local.env.subnets
   vpc_security_group_ids = [module.rds_sg.security_group_id]
 
-  performance_insights_enabled = false
-  create_monitoring_role       = false
+  performance_insights_enabled    = local.env.production
+  create_monitoring_role          = local.env.production
+  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
-  backup_retention_period = 0
-  deletion_protection     = false
+  backup_retention_period = local.env.backup_retention_period
+  deletion_protection     = local.env.production
   skip_final_snapshot     = true
 
   tags = local.tags
