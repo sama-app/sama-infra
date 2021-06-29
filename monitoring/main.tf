@@ -94,28 +94,28 @@ module "monitoring_sg" {
       to_port     = 3000
       protocol    = "TCP"
       description = "grafana port"
-      cidr_blocks = local.env.vpc_cidr_blocks
+      cidr_blocks = local.env.vpc_cidr_block
     },
     {
       from_port   = 9090
       to_port     = 9090
       protocol    = "TCP"
       description = "prometheus port"
-      cidr_blocks = local.env.vpc_cidr_blocks
+      cidr_blocks = local.env.vpc_cidr_block
     },
     {
       from_port   = 9100
       to_port     = 9100
       protocol    = "TCP"
       description = "metrics port"
-      cidr_blocks = local.env.vpc_cidr_blocks
+      cidr_blocks = local.env.vpc_cidr_block
     },
     {
       from_port   = 22
       to_port     = 22
       protocol    = "TCP"
       description = "SSH"
-      cidr_blocks = local.env.vpc_cidr_blocks
+      cidr_blocks = local.env.vpc_cidr_block
     }
   ]
 

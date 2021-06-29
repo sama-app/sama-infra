@@ -17,13 +17,14 @@ module "db" {
   create_db_parameter_group = false
 
   engine               = "postgres"
-  engine_version       = "13.2"
-  family               = "postgres13"
-  major_engine_version = "13"
-  instance_class       = "db.t3.micro"
+  engine_version       = "12.6"
+  family               = "postgres12"
+  major_engine_version = "12"
+  instance_class       = "db.t2.micro"
 
-  allocated_storage = 20
-  storage_encrypted = local.env.production
+  allocated_storage           = 20
+  allow_major_version_upgrade = true
+  storage_encrypted           = local.env.production
 
   name                   = "sama"
   username               = "postgres"
@@ -31,7 +32,7 @@ module "db" {
   random_password_length = 12
   port                   = 5432
 
-  multi_az               = local.env.production
+  multi_az               = false
   subnet_ids             = local.env.subnets
   vpc_security_group_ids = [module.rds_sg.security_group_id]
 
