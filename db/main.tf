@@ -20,7 +20,7 @@ module "db" {
   engine_version       = "12.6"
   family               = "postgres12"
   major_engine_version = "12"
-  instance_class       = "db.t2.micro"
+  instance_class       = local.env.instance_class
 
   allocated_storage           = 20
   allow_major_version_upgrade = true
