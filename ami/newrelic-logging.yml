@@ -1,0 +1,10 @@
+logs:
+  - name: syslog
+    file: /var/log/syslog
+
+  - name: cloud-init-log
+    file: /var/log/cloud-init.outout.log
+
+  - name: container-logs
+    file: /var/lib/docker/containers/*/*.log
+
