@@ -32,7 +32,7 @@ module "db" {
   random_password_length = 12
   port                   = 5432
 
-  multi_az               = false
+  multi_az               = local.env.production
   subnet_ids             = local.env.subnets
   vpc_security_group_ids = [module.rds_sg.security_group_id]
 
@@ -43,6 +43,8 @@ module "db" {
   backup_retention_period = local.env.backup_retention_period
   deletion_protection     = local.env.production
   skip_final_snapshot     = true
+
+  apply_immediately = var.apply_immediately
 
   tags = local.tags
 }

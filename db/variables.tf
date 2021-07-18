@@ -7,3 +7,10 @@ locals {
     Environment = terraform.workspace
   }
 }
+
+
+variable "apply_immediately" {
+  description = "Set to true if apply changes immediately instead of a during a maintenance window"
+  type = bool
+  default = false
+}
