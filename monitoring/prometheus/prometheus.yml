@@ -1,6 +1,6 @@
 global:
-  scrape_interval:     15s
-  evaluation_interval: 15s
+  scrape_interval:     30s
+  evaluation_interval: 30s
 
 scrape_configs:
   - job_name: 'ec2_node_exporter'
@@ -19,3 +19,7 @@ scrape_configs:
       - source_labels: [__meta_ec2_tag_Name]
         regex: sama-service-.*
         action: keep
+
+remote_write:
+  - url: https://metric-api.eu.newrelic.com/prometheus/v1/write?prometheus_server=prometheus-prod
+    bearer_token: eu01xx251df55d793dd5a5d3416900aded02NRAL

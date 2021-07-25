@@ -1,5 +1,5 @@
 # Monitoring
 
-Prometheus and Grafana run dockerized on a single EC2 instance
+Prometheus running dockerized on a single EC2 instance. Configured to push metrics to NewRelic
 
-Build scripts for docker images can be found in grafana/ and prometheus/
+Build scripts for docker images can be found prometheus/

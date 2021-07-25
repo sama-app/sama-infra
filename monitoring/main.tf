@@ -3,64 +3,23 @@ provider "aws" {
   region  = local.region
 }
 
-resource "aws_lb_target_group" "monitoring" {
-  name        = "monitoring-tg-${terraform.workspace}"
-  protocol    = "HTTP"
-  port        = 3000
-  vpc_id      = local.env.vpc_id
-  target_type = "instance"
-
-  health_check {
-    enabled             = true
-    interval            = 15
-    path                = "/api/health"
-    port                = "traffic-port"
-    healthy_threshold   = 3
-    unhealthy_threshold = 5
-    timeout             = 5
-    protocol            = "HTTP"
-    matcher             = "200-299"
-  }
-}
-
-resource "aws_lb_target_group_attachment" "monitoring" {
-  target_group_arn = aws_lb_target_group.monitoring.arn
-  target_id        = module.monitoring.id[0]
-  port             = 3000
-}
-
-resource "aws_lb_listener_rule" "monitoring" {
-  listener_arn = local.env.lb_listener_arn
-
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.monitoring.arn
-  }
-
-  condition {
-    host_header {
-      values = [local.env.grafana_domain]
-    }
-  }
-}
-
 # Deployment
-module "monitoring" {
+module "prometheus" {
   source  = "terraform-aws-modules/ec2-instance/aws"
   version = "~> 2.0"
 
-  name = "monitoring-${terraform.workspace}"
+  name = "prometheus-${terraform.workspace}"
 
   instance_count = 1
   ami            = var.ami_id
   instance_type  = "t2.micro"
 
   vpc_security_group_ids = [
-  module.monitoring_sg.security_group_id]
+  module.prometheus_sg.security_group_id]
   subnet_id                   = local.env.subnet_id
   associate_public_ip_address = true
 
-  iam_instance_profile = aws_iam_instance_profile.monitoring.name
+  iam_instance_profile = aws_iam_instance_profile.prometheus.name
 
   root_block_device = [
     {
@@ -80,22 +39,15 @@ module "monitoring" {
 }
 
 
-module "monitoring_sg" {
+module "prometheus_sg" {
   source  = "terraform-aws-modules/security-group/aws"
   version = "~> 4.0"
 
-  name        = "monitoring-sg-${terraform.workspace}"
-  description = "Security group for monitoring"
+  name        = "prometheus-sg-${terraform.workspace}"
+  description = "Security group for prometheus"
   vpc_id      = local.env.vpc_id
 
   ingress_with_cidr_blocks = [
-    {
-      from_port   = 3000
-      to_port     = 3000
-      protocol    = "TCP"
-      description = "grafana port"
-      cidr_blocks = local.env.vpc_cidr_block
-    },
     {
       from_port   = 9090
       to_port     = 9090
@@ -124,13 +76,13 @@ module "monitoring_sg" {
   ]
 }
 
-resource "aws_iam_instance_profile" "monitoring" {
-  name = "monitoring-instance-profile-${terraform.workspace}"
-  role = aws_iam_role.monitoring.name
+resource "aws_iam_instance_profile" "prometheus" {
+  name = "prometheus-instance-profile-${terraform.workspace}"
+  role = aws_iam_role.prometheus.name
 }
 
-resource "aws_iam_role" "monitoring" {
-  name = "monitoring-role-${terraform.workspace}"
+resource "aws_iam_role" "prometheus" {
+  name = "prometheus-role-${terraform.workspace}"
   path = "/"
 
   managed_policy_arns = [
