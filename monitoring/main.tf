@@ -12,7 +12,7 @@ module "prometheus" {
 
   instance_count = 1
   ami            = var.ami_id
-  instance_type  = "t2.micro"
+  instance_type  = "t3.nano"
 
   vpc_security_group_ids = [
   module.prometheus_sg.security_group_id]
