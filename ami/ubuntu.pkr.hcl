@@ -33,7 +33,7 @@ build {
     "source.amazon-ebs.ubuntu"
   ]
   provisioner "file" {
-    sources = ["install_docker.sh", "install_aws.sh", "install_newrelic.sh", "newrelic-logging.yml", "post_install.sh"]
+    sources = ["install_docker.sh", "install_aws.sh", "install_newrelic.sh", "newrelic-logging.yml", "post_install.sh", "setup_env.sh"]
     destination = "/tmp/"
   }
   provisioner "shell" {
