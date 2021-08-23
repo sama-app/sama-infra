@@ -63,6 +63,11 @@ resource "aws_cloudfront_distribution" "sama_distribution" {
     cache_policy_id          = data.aws_cloudfront_cache_policy.no_cache.id
     origin_request_policy_id = data.aws_cloudfront_origin_request_policy.all_viewer.id
     viewer_protocol_policy   = "redirect-to-https"
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = data.aws_cloudfront_function.add_real_client_ip.arn
+    }
   }
 
   restrictions {
@@ -81,10 +86,10 @@ resource "aws_cloudfront_distribution" "sama_distribution" {
 }
 
 resource "aws_cloudfront_cache_policy" "sama_web" {
-  name                          = "sama-web-policy-${terraform.workspace}"
-  default_ttl                   = 31536000
-  max_ttl                       = 31536000
-  min_ttl                       = 1
+  name        = "sama-web-policy-${terraform.workspace}"
+  default_ttl = 31536000
+  max_ttl     = 31536000
+  min_ttl     = 1
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
@@ -115,4 +120,9 @@ data "aws_cloudfront_origin_request_policy" "all_viewer" {
 
 data "aws_cloudfront_cache_policy" "no_cache" {
   name = "Managed-CachingDisabled"
+}
+
+data "aws_cloudfront_function" "add_real_client_ip" {
+  name = "add-real-client-ip"
+  stage = "LIVE"
 }
