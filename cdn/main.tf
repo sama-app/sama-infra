@@ -4,6 +4,8 @@ provider "aws" {
 }
 
 resource "aws_cloudfront_distribution" "sama_distribution" {
+  comment = terraform.workspace
+
   enabled             = true
   is_ipv6_enabled     = true
   default_root_object = "index.html"
@@ -52,6 +54,11 @@ resource "aws_cloudfront_distribution" "sama_distribution" {
     }
     domain_name = data.aws_alb.sama_service.dns_name
     origin_id   = local.sama_service_origin_id
+    // Header that the ALB requires to serve traffic
+    custom_header {
+      name = "X-Alb-Secure"
+      value = local.env.cf_to_alb_secure_header_value
+    }
   }
 
   ordered_cache_behavior {
@@ -87,9 +94,9 @@ resource "aws_cloudfront_distribution" "sama_distribution" {
 
 resource "aws_cloudfront_cache_policy" "sama_web" {
   name        = "sama-web-policy-${terraform.workspace}"
-  default_ttl = 31536000
-  max_ttl     = 31536000
-  min_ttl     = 1
+  default_ttl = local.env.sama_web_cache_default_ttl
+  max_ttl     = local.env.sama_web_cache_max_ttl
+  min_ttl     = local.env.sama_web_cache_min_ttl
 
   parameters_in_cache_key_and_forwarded_to_origin {
     cookies_config {
