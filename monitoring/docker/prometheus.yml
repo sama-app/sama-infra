@@ -1,0 +1,14 @@
+global:
+  scrape_interval:     45s
+  evaluation_interval: 45s
+
+scrape_configs:
+  - job_name: ecs
+    file_sd_configs:
+      - files:
+          - /output/ecs_file_sd.yml
+        refresh_interval: 1m
+
+remote_write:
+  - url: https://metric-api.eu.newrelic.com/prometheus/v1/write?prometheus_server=prometheus-prod
+    bearer_token: $NEW_RELIC_TOKEN
